@@ -67,8 +67,8 @@ func (c *CommandInput) Next() bool {
 // Value returns the input from command stdoutput
 func (c *CommandInput) Value() []byte {
 	var stdout bytes.Buffer
-	os.Setenv("FFUF_NUM", strconv.Itoa(c.count))
 	cmd := exec.Command(c.shell, SHELL_ARG, c.command)
+	cmd.Env = append(os.Environ(), "FFUF_NUM="+strconv.Itoa(c.count))
 	cmd.Stdout = &stdout
 	err := cmd.Run()
 	if err != nil {

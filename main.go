@@ -209,7 +209,11 @@ func main() {
 			log.SetOutput(io.Discard)
 		} else {
 			log.SetOutput(f)
-			defer f.Close()
+			defer func() {
+				if closeErr := f.Close(); closeErr != nil {
+					fmt.Fprintf(os.Stderr, "could not close debug log: %v\n", closeErr)
+				}
+			}()
 		}
 	} else {
 		log.SetOutput(io.Discard)

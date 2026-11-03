@@ -89,7 +89,7 @@ func (r *SimpleRunner) Prepare(input map[string][]byte, basereq *ffuf.Request) (
 		req.Method = strings.ReplaceAll(req.Method, keyword, string(inputitem))
 		headers := make(map[string]string, len(req.Headers))
 		for h, v := range req.Headers {
-			var CanonicalHeader string = textproto.CanonicalMIMEHeaderKey(strings.ReplaceAll(h, keyword, string(inputitem)))
+			CanonicalHeader := textproto.CanonicalMIMEHeaderKey(strings.ReplaceAll(h, keyword, string(inputitem)))
 			headers[CanonicalHeader] = strings.ReplaceAll(v, keyword, string(inputitem))
 		}
 		req.Headers = headers
@@ -101,7 +101,7 @@ func (r *SimpleRunner) Prepare(input map[string][]byte, basereq *ffuf.Request) (
 	return req, nil
 }
 
-func (r *SimpleRunner) Execute(req *ffuf.Request) (ffuf.Response, error) {
+func (r *SimpleRunner) Execute(req *ffuf.Request) (response ffuf.Response, resultErr error) {
 	var httpreq *http.Request
 	var err error
 	var rawreq []byte
@@ -159,7 +159,11 @@ func (r *SimpleRunner) Execute(req *ffuf.Request) (ffuf.Response, error) {
 	req.Timestamp = start
 
 	resp := ffuf.NewResponse(httpresp, req)
-	defer httpresp.Body.Close()
+	defer func() {
+		if closeErr := httpresp.Body.Close(); resultErr == nil {
+			resultErr = closeErr
+		}
+	}()
 
 	// Check if we should download the resource or not
 	size, err := strconv.Atoi(httpresp.Header.Get("Content-Length"))

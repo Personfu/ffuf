@@ -102,11 +102,12 @@ func (s *Scraper) Execute(resp *ffuf.Response, matched bool) []ffuf.ScraperResul
 			continue
 		}
 		sourceData := ""
-		if rule.Target == "body" {
+		switch rule.Target {
+		case "body":
 			sourceData = string(resp.Data)
-		} else if rule.Target == "headers" {
+		case "headers":
 			sourceData = headerString(resp.Headers)
-		} else {
+		default:
 			sourceData = headerString(resp.Headers) + string(resp.Data)
 		}
 		val := rule.Check(sourceData)
@@ -135,9 +136,10 @@ func (r *ScraperRule) init() error {
 }
 
 func (r *ScraperRule) Check(data string) []string {
-	if r.Type == "regexp" {
+	switch r.Type {
+	case "regexp":
 		return r.checkRegexp(data)
-	} else if r.Type == "query" {
+	case "query":
 		return r.checkQuery(data)
 	}
 	return []string{}

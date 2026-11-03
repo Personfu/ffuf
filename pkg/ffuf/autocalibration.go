@@ -4,17 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"math/rand"
 	"os"
 	"path/filepath"
 	"strconv"
-	"time"
 )
 
 type AutocalibrationStrategy map[string][]string
 
 func (j *Job) autoCalibrationStrings() map[string][]string {
-	rand.Seed(time.Now().UnixNano())
 	cInputs := make(map[string][]string)
 
 	if len(j.Config.AutoCalibrationStrings) > 0 {
@@ -100,7 +97,7 @@ func (j *Job) calibrationRequest(inputs map[string][]byte) (Response, error) {
 	if j.isMatch(resp) {
 		return resp, nil
 	}
-	return resp, fmt.Errorf("Response wouldn't be matched")
+	return resp, fmt.Errorf("response wouldn't be matched")
 }
 
 // CalibrateForHost runs autocalibration for a specific host
@@ -109,7 +106,7 @@ func (j *Job) CalibrateForHost(host string, baseinput map[string][]byte) error {
 		return nil
 	}
 	if baseinput[j.Config.AutoCalibrationKeyword] == nil {
-		return fmt.Errorf("Autocalibration keyword \"%s\" not found in the request.", j.Config.AutoCalibrationKeyword)
+		return fmt.Errorf("autocalibration keyword \"%s\" not found in the request", j.Config.AutoCalibrationKeyword)
 	}
 	cStrings := j.autoCalibrationStrings()
 	input := make(map[string][]byte)
@@ -278,5 +275,5 @@ func (j *Job) calibrateFilters(responses []Response, perHost bool) error {
 			}
 		}
 	}
-	return fmt.Errorf("No common filtering values found")
+	return fmt.Errorf("no common filtering values found")
 }

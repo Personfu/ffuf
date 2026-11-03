@@ -11,16 +11,25 @@ import (
 
 var staticheaders = []string{"url", "redirectlocation", "position", "status_code", "content_length", "content_words", "content_lines", "content_type", "duration", "resultfile", "Ffufhash"}
 
-func writeCSV(filename string, config *ffuf.Config, res []ffuf.Result, encode bool) error {
+func writeCSV(filename string, config *ffuf.Config, res []ffuf.Result, encode bool) (resultErr error) {
 	header := make([]string, 0)
 	f, err := os.Create(filename)
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer func() {
+		if closeErr := f.Close(); resultErr == nil {
+			resultErr = closeErr
+		}
+	}()
 
 	w := csv.NewWriter(f)
-	defer w.Flush()
+	defer func() {
+		w.Flush()
+		if resultErr == nil {
+			resultErr = w.Error()
+		}
+	}()
 
 	for _, inputprovider := range config.InputProviders {
 		header = append(header, inputprovider.Keyword)

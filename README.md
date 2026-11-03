@@ -303,3 +303,19 @@ job from the beginning.
 ## License
 
 ffuf is released under MIT license. See [LICENSE](https://github.com/ffuf/ffuf/blob/master/LICENSE).
+
+## Building this fork with security updates
+
+Use Go 1.27.3 (the pinned toolchain) and build this checkout with `go build ./...`.
+The module graph requires Go 1.26 or later and updates `golang.org/x/net` to
+0.62.0, replacing the dependency covered by
+[CVE-2023-44487](https://pkg.go.dev/vuln/GO-2023-2102). This HTTP/2 server
+vulnerability in a dependency does not by itself demonstrate a reachable
+server endpoint in this CLI.
+
+Run `go test ./...`, `go vet ./...`, and
+`go run golang.org/x/vuln/cmd/govulncheck@v1.9.0 ./...` before packaging.
+[Go 1.27.3](https://go.dev/doc/devel/release#go1.27.3) also includes
+standard-library security fixes. Rebuild and replace installed binaries to
+update their embedded Go runtime; the module file cannot update existing
+executables or upstream releases.

@@ -3,6 +3,7 @@ package output
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"reflect"
 	"sync"
@@ -24,7 +25,9 @@ func NewAuditLogger(filename string) (*AuditLogger, error) {
 }
 
 func (logger *AuditLogger) Close() {
-	logger.file.Close()
+	if err := logger.file.Close(); err != nil {
+		log.Printf("could not close audit log: %v", err)
+	}
 }
 
 func (logger *AuditLogger) Write(data interface{}) error {

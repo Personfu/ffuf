@@ -10,7 +10,9 @@ import (
 func TestAuditLogger(t *testing.T) {
 	file, _ := os.CreateTemp("", "prefix")
 	filename := file.Name()
-	file.Close()
+	if err := file.Close(); err != nil {
+		t.Fatal(err)
+	}
 	audit, err := NewAuditLogger(filename)
 
 	if err != nil {
@@ -21,7 +23,7 @@ func TestAuditLogger(t *testing.T) {
 		t.Errorf("Audit was nil, expected non-nil")
 	}
 
-	defer audit.Close()
+	audit.Close()
 
 	err = os.Chmod(filename, 000)
 	if err != nil {
@@ -67,7 +69,9 @@ func TestAuditLogWrite(t *testing.T) {
 
 	file, _ := os.CreateTemp("", "prefix")
 	filename := file.Name()
-	file.Close()
+	if err := file.Close(); err != nil {
+		t.Fatal(err)
+	}
 	audit, err := NewAuditLogger(filename)
 
 	if err != nil {
