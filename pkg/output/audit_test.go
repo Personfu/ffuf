@@ -21,7 +21,7 @@ func TestAuditLogger(t *testing.T) {
 		t.Errorf("Audit was nil, expected non-nil")
 	}
 
-	defer audit.Close()
+	audit.Close()
 
 	err = os.Chmod(filename, 000)
 	if err != nil {
