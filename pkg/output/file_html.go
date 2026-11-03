@@ -200,7 +200,7 @@ func colorizeResults(results []ffuf.Result) []ffuf.Result {
 	return newResults
 }
 
-func writeHTML(filename string, config *ffuf.Config, results []ffuf.Result) error {
+func writeHTML(filename string, config *ffuf.Config, results []ffuf.Result) (resultErr error) {
 	results = colorizeResults(results)
 
 	ti := time.Now()
@@ -266,7 +266,11 @@ func writeHTML(filename string, config *ffuf.Config, results []ffuf.Result) erro
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer func() {
+		if closeErr := f.Close(); resultErr == nil {
+			resultErr = closeErr
+		}
+	}()
 
 	templateName := "output.html"
 	t := template.New(templateName).Delims("{{", "}}")

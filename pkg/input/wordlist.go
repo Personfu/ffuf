@@ -107,12 +107,14 @@ func (w *WordlistInput) validFile(path string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	f.Close()
+	if err := f.Close(); err != nil {
+		return false, err
+	}
 	return true, nil
 }
 
 // readFile reads the file line by line to a byte slice
-func (w *WordlistInput) readFile(path string) error {
+func (w *WordlistInput) readFile(path string) (resultErr error) {
 	var file *os.File
 	var err error
 	if path == "-" {
@@ -123,7 +125,13 @@ func (w *WordlistInput) readFile(path string) error {
 			return err
 		}
 	}
-	defer file.Close()
+	if path != "-" {
+		defer func() {
+			if closeErr := file.Close(); resultErr == nil {
+				resultErr = closeErr
+			}
+		}()
+	}
 
 	var data [][]byte
 	var ok bool

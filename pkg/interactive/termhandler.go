@@ -15,19 +15,23 @@ type interactive struct {
 	paused bool
 }
 
-func Handle(job *ffuf.Job) error {
+func Handle(job *ffuf.Job) (resultErr error) {
 	i := interactive{job, false}
 	tty, err := termHandle()
 	if err != nil {
 		return err
 	}
-	defer tty.Close()
+	defer func() {
+		if closeErr := tty.Close(); resultErr == nil {
+			resultErr = closeErr
+		}
+	}()
 	inreader := bufio.NewScanner(tty)
 	inreader.Split(bufio.ScanLines)
 	for inreader.Scan() {
 		i.handleInput(inreader.Bytes())
 	}
-	return nil
+	return inreader.Err()
 }
 
 func (i *interactive) handleInput(in []byte) {
